@@ -1,38 +1,42 @@
+$(function() {
+  init();
+});
+
 var camera, scene, renderer;
 var geometry, material, mesh;
 
-init();
-animate();
-
 function init() {
-  var SCENE_WIDTH = 400, SCENE_HEIGHT = 300;
+  var SCENE_WIDTH = 600, SCENE_HEIGHT = 500;
 
   camera = new THREE.PerspectiveCamera( 75, SCENE_WIDTH / SCENE_HEIGHT, 1, 10000 );
-  camera.position.z = 1000;
+  camera.position.z = 100;
 
   scene = new THREE.Scene();
 
-  geometry = new THREE.CubeGeometry( 200, 200, 200 );
-  material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+  var radius = 50, segments = 16, rings = 16;
+  geometry = new THREE.SphereGeometry(radius, segments, rings);
+  material = new THREE.MeshLambertMaterial( { color: 0xCC0000 } );
 
   mesh = new THREE.Mesh( geometry, material );
   scene.add( mesh );
 
-  renderer = new THREE.CanvasRenderer();
+  // create a point light
+  var pointLight =
+    new THREE.PointLight(0xFFFFFF);
+
+  // set its position
+  pointLight.position.x = 10;
+  pointLight.position.y = 50;
+  pointLight.position.z = 130;
+
+  // add to the scene
+  scene.add(pointLight);
+
+  //renderer = new THREE.CanvasRenderer();
+  renderer = new THREE.WebGLRenderer();
   renderer.setSize( SCENE_WIDTH, SCENE_HEIGHT );
 
-  document.body.appendChild( renderer.domElement );
-
-}
-
-function animate() {
-
-  // note: three.js includes requestAnimationFrame shim
-  requestAnimationFrame( animate );
-
-  mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.02;
+  $('#render_container').html( renderer.domElement );
 
   renderer.render( scene, camera );
-
 }
