@@ -1,24 +1,22 @@
+
 $(function() {
   init();
 });
 
-var camera, scene, renderer;
-var geometry, material, mesh;
 
 function init() {
+  var camera, scene, renderer;
   var SCENE_WIDTH = 600, SCENE_HEIGHT = 500;
 
   camera = new THREE.PerspectiveCamera( 75, SCENE_WIDTH / SCENE_HEIGHT, 1, 10000 );
-  camera.position.z = 100;
+  camera.position.x = 100;
+  camera.position.y = 50;
+  camera.position.z = 500;
+  camera.lookAt(new THREE.Vector3(0,0,0));
 
   scene = new THREE.Scene();
-
-  var radius = 50, segments = 16, rings = 16;
-  geometry = new THREE.SphereGeometry(radius, segments, rings);
-  material = new THREE.MeshLambertMaterial( { color: 0xCC0000 } );
-
-  mesh = new THREE.Mesh( geometry, material );
-  scene.add( mesh );
+  buildAxes(scene);
+  buildMolecule(scene);
 
   // create a point light
   var pointLight =
@@ -39,4 +37,32 @@ function init() {
   $('#render_container').html( renderer.domElement );
 
   renderer.render( scene, camera );
+}
+
+function buildMolecule(scene) {
+  var geometry, mesh;
+
+  var materialCarbon = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
+  geometry = new THREE.SphereGeometry(50, 16, 16);
+  mesh = new THREE.Mesh( geometry, materialCarbon );
+  mesh.position.set(0, 0, 0);
+  scene.add( mesh );
+
+  var materialBrom = new THREE.MeshLambertMaterial( { color: 0xFF0000 } );
+  geometry = new THREE.SphereGeometry(60, 16, 16);
+  mesh = new THREE.Mesh( geometry, materialBrom );
+  mesh.position.set(110, 0, 0);
+  scene.add( mesh );
+}
+
+function buildAxes(scene) {
+  var geometry = new THREE.Geometry();
+  var axisLength = 600;
+  geometry.vertices.push(new THREE.Vector3(-axisLength, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(axisLength, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(0, -axisLength, 0));
+  geometry.vertices.push(new THREE.Vector3(0, axisLength, 0));
+  geometry.vertices.push(new THREE.Vector3(0, 0, -axisLength));
+  geometry.vertices.push(new THREE.Vector3(0, 0, axisLength));
+  scene.add(new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x0000FF }), THREE.LinePieces));
 }
