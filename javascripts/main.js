@@ -49,18 +49,42 @@ function animate() {
 }
 
 function buildMolecule(scene) {
-  var geometry, mesh;
+  var geometry, mesh, atomRadius;
 
   var materialCarbon = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
-  geometry = new THREE.SphereGeometry(50, 16, 16);
+  // Carbon atom
+  atomRadius = 50;
+  geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
   mesh = new THREE.Mesh( geometry, materialCarbon );
   mesh.position.set(0, 0, 0);
   scene.add( mesh );
 
+  // Carbon bonds
+  var bondInsideLength = 5; // how much bond is 'inside' an atom
+  var bondLength = 80;
+  var bondBottomPosition = bondLength / 2 + atomRadius - bondInsideLength;
+  geometry = new THREE.CylinderGeometry(8, 8, bondLength, 8, 8, false);
+  mesh = new THREE.Mesh( geometry, materialCarbon );
+  mesh.position.set(0, bondBottomPosition, 0);
+  scene.add(mesh);
+  mesh = new THREE.Mesh( geometry, materialCarbon );
+  mesh.position.set(bondBottomPosition, 0, 0);
+  mesh.rotation.z = Math.PI/2;
+  scene.add(mesh);
+  mesh = new THREE.Mesh( geometry, materialCarbon );
+  mesh.position.set(0, -bondBottomPosition, 0);
+  scene.add(mesh);
+  mesh = new THREE.Mesh( geometry, materialCarbon );
+  mesh.position.set(-bondBottomPosition, 0, 0);
+  mesh.rotation.z = Math.PI/2;
+  scene.add(mesh);
+
   var materialBrom = new THREE.MeshLambertMaterial( { color: 0xFF0000 } );
-  geometry = new THREE.SphereGeometry(60, 16, 16);
+  // brom atom
+  atomRadius = 60;
+  geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
   mesh = new THREE.Mesh( geometry, materialBrom );
-  mesh.position.set(110, 0, 0);
+  mesh.position.set(200, 0, 0);
   scene.add( mesh );
 }
 
