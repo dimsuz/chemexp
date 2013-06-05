@@ -1,18 +1,20 @@
 
 $(function() {
   init();
+  animate();
 });
 
+var camera, scene, renderer, controls;
 
 function init() {
-  var camera, scene, renderer;
   var SCENE_WIDTH = 600, SCENE_HEIGHT = 500;
 
   camera = new THREE.PerspectiveCamera( 75, SCENE_WIDTH / SCENE_HEIGHT, 1, 10000 );
-  camera.position.x = 100;
-  camera.position.y = 50;
+  camera.position.x = 0;
+  camera.position.y = 0;
   camera.position.z = 500;
-  camera.lookAt(new THREE.Vector3(0,0,0));
+  controls = new THREE.TrackballControls(camera);
+  controls.addEventListener('change', render);
 
   scene = new THREE.Scene();
   buildAxes(scene);
@@ -35,8 +37,15 @@ function init() {
   renderer.setSize( SCENE_WIDTH, SCENE_HEIGHT );
 
   $('#render_container').html( renderer.domElement );
+}
 
+function render() {
   renderer.render( scene, camera );
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
 }
 
 function buildMolecule(scene) {
