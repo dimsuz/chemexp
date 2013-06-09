@@ -15,8 +15,8 @@ function init() {
   camera.position.z = 500;
 
   scene = new THREE.Scene();
-  //buildAxes(scene);
-  buildMolecule(scene);
+  buildAxes(scene);
+  buildMolecule1(scene);
 
   var keyLight =
     new THREE.PointLight(0xFFFFFF);
@@ -63,6 +63,39 @@ function animate() {
     controls.update();
   }
 }
+
+/**
+ * takes a tetrahedron edge side and builds a set of vertexes for its coords
+ */
+function createTetrahedronCoords(edgeSize) {
+  var vertexes = [];
+  vertexes.push(new THREE.Vector3(0, 0, -Math.sqrt(3)*edgeSize/3));
+  vertexes.push(new THREE.Vector3(edgeSize/2, 0, Math.sqrt(3)*edgeSize/6));
+  vertexes.push(new THREE.Vector3(-edgeSize/2, 0, Math.sqrt(3)*edgeSize/6));
+  var H = Math.sqrt(6)*edgeSize/3;
+  var R = Math.sqrt(6)*edgeSize/4;
+  vertexes.push(new THREE.Vector3(0, H, 0));
+
+  // center point
+  vertexes.push(new THREE.Vector3(0, H - R, 0));
+
+  return vertexes;
+}
+
+function buildMolecule1(scene) {
+  var vertexes = createTetrahedronCoords(200);
+  vertexes.forEach(function(v) {
+    var material = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
+    var geometry = new THREE.SphereGeometry(30, 16, 16);
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.position = v;
+    scene.add(mesh);
+
+  });
+
+}
+
+
 
 function buildMolecule(scene) {
   var geometry, mesh, atomRadius;
