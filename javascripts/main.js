@@ -7,7 +7,7 @@ $(function() {
 var camera, scene, renderer, controls;
 
 function init() {
-  var SCENE_WIDTH = 300, SCENE_HEIGHT = 300;
+  var SCENE_WIDTH = 500, SCENE_HEIGHT = 500;
 
   camera = new THREE.PerspectiveCamera( 75, SCENE_WIDTH / SCENE_HEIGHT, 1, 10000 );
   camera.position.x = 0;
@@ -84,18 +84,55 @@ function createTetrahedronCoords(edgeSize) {
 
 function buildMolecule1(scene) {
   var vertexes = createTetrahedronCoords(200);
+  var atomRadius = 30;
   vertexes.forEach(function(v) {
     var material = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
-    var geometry = new THREE.SphereGeometry(30, 16, 16);
+    var geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
     var mesh = new THREE.Mesh(geometry, material);
     mesh.position = v;
     scene.add(mesh);
-
   });
 
+  buildBonds(scene, vertexes, atomRadius);
+}
+
+function buildBonds(scene, vertexes, atomRadius) {
+  var center = vertexes[vertexes.length - 1];
+  var bondLength = 60;
+  var material = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
+  var geometry = new THREE.CylinderGeometry(8, 8, bondLength, 8, 8, false);
+  // transfer origin to end of cylinder
+  geometry.applyMatrix( new THREE.Matrix4().makeTranslation(0, bondLength/2, 0) );
+  var mesh = new THREE.Mesh(geometry, material);
+  var angle = vertexes[1].angleTo(new THREE.Vector3(1, 0, 0));
+  console.log(angle);
+  mesh.position.set(center.x, center.y + atomRadius, center.z);
+  rotateAroundWorldAxis(mesh, new THREE.Vector3(0, 0, 1), Math.PI*-90/180);
+  //rotateAroundWorldAxis(mesh, new THREE.Vector3(0, 1, 0), Math.PI*45/180);
+  //rotateAroundWorldAxis(mesh, new THREE.Vector3(0, 1, 0), angle);
+  scene.add(mesh);
+
+  geometry = new THREE.Geometry();
+  geometry.vertices.push(center);
+  geometry.vertices.push(vertexes[1]);
+  var line = new THREE.Line(geometry, material, parameters = { linewidth: 400 });
+  scene.add(line);
 }
 
 
+var rotWorldMatrix;
+function rotateAroundWorldAxis(object, axis, radians) {
+    rotWorldMatrix = new THREE.Matrix4();
+    rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+    rotWorldMatrix.multiply(object.matrix);        // pre-multiply
+    object.matrix = rotWorldMatrix;
+
+    // new code for Three.js v50+
+    object.rotation.setEulerFromRotationMatrix(object.matrix);
+
+    // old code for Three.js v49:
+    // object.rotation.getRotationFromMatrix(object.matrix, object.scale);
+}
 
 function buildMolecule(scene) {
   var geometry, mesh, atomRadius;
