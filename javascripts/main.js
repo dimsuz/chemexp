@@ -35,7 +35,7 @@ function init() {
   var backLight =
     new THREE.PointLight(0xFFFFFF);
   backLight.position.x = 0;
-  backLight.position.y = 0;
+  backLight.position.y = 100;
   backLight.position.z = -200;
   backLight.intensity = 1.0;
 
@@ -68,16 +68,18 @@ function animate() {
  * takes a tetrahedron edge side and builds a set of vertexes for its coords
  */
 function createTetrahedronCoords(edgeSize) {
-  var vertexes = [];
-  vertexes.push(new THREE.Vector3(0, 0, -Math.sqrt(3)*edgeSize/3));
-  vertexes.push(new THREE.Vector3(edgeSize/2, 0, Math.sqrt(3)*edgeSize/6));
-  vertexes.push(new THREE.Vector3(-edgeSize/2, 0, Math.sqrt(3)*edgeSize/6));
   var H = Math.sqrt(6)*edgeSize/3;
   var R = Math.sqrt(6)*edgeSize/4;
-  vertexes.push(new THREE.Vector3(0, H, 0));
+  var rBotTri = Math.sqrt(3)*edgeSize/6;
 
+  var vertexes = [];
   // center point
-  vertexes.push(new THREE.Vector3(0, H - R, 0));
+  vertexes.push(new THREE.Vector3(0, 0, 0));
+
+  vertexes.push(new THREE.Vector3(0, R - H, -Math.sqrt(3)*edgeSize/3));
+  vertexes.push(new THREE.Vector3(edgeSize/2, R - H, rBotTri));
+  vertexes.push(new THREE.Vector3(-edgeSize/2, R - H, rBotTri));
+  vertexes.push(new THREE.Vector3(0, R, 0));
 
   return vertexes;
 }
@@ -85,24 +87,28 @@ function createTetrahedronCoords(edgeSize) {
 function buildMolecule1(scene) {
   var vertexes = createTetrahedronCoords(200);
   var atomRadius = 30;
-  vertexes.forEach(function(v) {
-    var material = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
+
+  // C, Br, Cl, F, H
+  var atomColors = [ 0xBBBBBB, 0xFF0000, 0x00FF00, 0xFFFF00, 0xEFEFEF ];
+
+  vertexes.forEach(function(v, i) {
+    var material = new THREE.MeshLambertMaterial( { color: atomColors[i] } );
     var geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
     var mesh = new THREE.Mesh(geometry, material);
     mesh.position = v;
     scene.add(mesh);
+
+    // bond
+    if(i > 0) {
+      var material1 = new THREE.MeshLambertMaterial( { color: atomColors[0] } );
+      var material2 = new THREE.MeshLambertMaterial( { color: atomColors[i] } );
+
+      var vHalf = vertexes[0].clone().lerp(vertexes[i], 0.5);
+      scene.add(cylinderBetweenPoints(vertexes[0], vHalf, 8, material1));
+      scene.add(cylinderBetweenPoints(vHalf, vertexes[i], 8, material2));
+    }
   });
 
-  buildBonds(scene, vertexes, atomRadius);
-}
-
-function buildBonds(scene, vertexes, atomRadius) {
-  var center = vertexes[vertexes.length - 1];
-  var material = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
-
-  for(var i=0; i<vertexes.length-1; ++i) {
-    scene.add(cylinderBetweenPoints(center, vertexes[i], 8, material));
-  }
 }
 
 // returns a cylinder mesh
