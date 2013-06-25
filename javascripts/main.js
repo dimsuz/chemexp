@@ -98,27 +98,28 @@ function buildMolecule1(scene) {
 
 function buildBonds(scene, vertexes, atomRadius) {
   var center = vertexes[vertexes.length - 1];
-  var bondLength = 60;
   var material = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
-  var geometry = new THREE.CylinderGeometry(8, 8, bondLength, 8, 8, false);
-  // transfer origin to end of cylinder
-  geometry.applyMatrix( new THREE.Matrix4().makeTranslation(0, bondLength/2, 0) );
-  var mesh = new THREE.Mesh(geometry, material);
-  var angle = vertexes[1].angleTo(new THREE.Vector3(1, 0, 0));
-  console.log(angle);
-  mesh.position.set(center.x, center.y + atomRadius, center.z);
-  rotateAroundWorldAxis(mesh, new THREE.Vector3(0, 0, 1), Math.PI*-90/180);
-  //rotateAroundWorldAxis(mesh, new THREE.Vector3(0, 1, 0), Math.PI*45/180);
-  //rotateAroundWorldAxis(mesh, new THREE.Vector3(0, 1, 0), angle);
-  scene.add(mesh);
 
-  geometry = new THREE.Geometry();
-  geometry.vertices.push(center);
-  geometry.vertices.push(vertexes[1]);
-  var line = new THREE.Line(geometry, material, parameters = { linewidth: 400 });
-  scene.add(line);
+  for(var i=0; i<vertexes.length-1; ++i) {
+    scene.add(cylinderBetweenPoints(center, vertexes[i], 8, material));
+  }
 }
 
+// returns a cylinder mesh
+function cylinderBetweenPoints(point1, point2, radius, material) {
+  var direction = new THREE.Vector3().subVectors(point2, point1);
+  var arrow = new THREE.ArrowHelper(direction.clone().normalize(), point1);
+
+  var rotation = new THREE.Vector3().setEulerFromQuaternion(arrow.quaternion);
+
+  var edgeGeometry = new THREE.CylinderGeometry( radius, radius, direction.length(), 10, 4 );
+
+  var edge = new THREE.Mesh(edgeGeometry, material);
+  edge.rotation = rotation.clone();
+  edge.position = new THREE.Vector3().addVectors(point1, direction.multiplyScalar(0.5));
+
+  return edge;
+}
 
 var rotWorldMatrix;
 function rotateAroundWorldAxis(object, axis, radians) {
@@ -132,103 +133,6 @@ function rotateAroundWorldAxis(object, axis, radians) {
 
     // old code for Three.js v49:
     // object.rotation.getRotationFromMatrix(object.matrix, object.scale);
-}
-
-function buildMolecule(scene) {
-  var geometry, mesh, atomRadius;
-  var bondLength = 60;
-  var bondInsideLength = 5; // how much bond is 'inside' an atom
-  var x = 0;
-  var y = 0;
-
-  // Carbon atom
-  var materialCarbon = new THREE.MeshLambertMaterial( { color: 0xBBBBBB } );
-  var atomCarbonRadius = 50;
-  geometry = new THREE.SphereGeometry(atomCarbonRadius, 16, 16);
-  mesh = new THREE.Mesh( geometry, materialCarbon );
-  mesh.position.set(x, 0, 0);
-  scene.add( mesh );
-  // bonds
-  createBonds(null, 0, 0, bondLength, bondInsideLength, atomCarbonRadius, materialCarbon);
-  x +=  atomCarbonRadius + bondLength - bondInsideLength;
-
-  // brom atom
-  var materialBrom = new THREE.MeshLambertMaterial( { color: 0xFF0000 } );
-  atomRadius = 60;
-  x += atomRadius + bondLength - bondInsideLength;
-  geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
-  mesh = new THREE.Mesh( geometry, materialBrom );
-  mesh.position.set(x, 0, 0);
-  scene.add( mesh );
-  // bonds
-  createBonds([ false, false, false, true ], x, 0, bondLength, bondInsideLength, atomRadius, materialBrom);
-
-  // chlor atom
-  var materialChlor = new THREE.MeshLambertMaterial( { color: 0x00FF00 } );
-  atomRadius = 60;
-  x = 0;
-  y = atomCarbonRadius + atomRadius + bondLength*2 - bondInsideLength*2;
-  geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
-  mesh = new THREE.Mesh( geometry, materialChlor );
-  mesh.position.set(x, y, 0);
-  scene.add( mesh );
-  // bonds
-  createBonds([ false, false, true, false ], x, y, bondLength, bondInsideLength, atomRadius, materialChlor);
-
-  var materialFtor = new THREE.MeshLambertMaterial( { color: 0xFFFF00 } );
-  atomRadius = 45;
-  x = 0;
-  y = -(atomCarbonRadius + atomRadius + bondLength*2 - bondInsideLength*2);
-  geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
-  mesh = new THREE.Mesh( geometry, materialFtor );
-  mesh.position.set(x, y, 0);
-  scene.add( mesh );
-  // bonds
-  createBonds([ true, false, false, false ], x, y, bondLength, bondInsideLength, atomRadius, materialChlor);
-
-  var materialGray = new THREE.MeshLambertMaterial( { color: 0xEFEFEF } );
-  atomRadius = 35;
-  x = -(atomCarbonRadius + atomRadius + bondLength*2 - bondInsideLength*2);
-  y = 0;
-  geometry = new THREE.SphereGeometry(atomRadius, 16, 16);
-  mesh = new THREE.Mesh( geometry, materialGray );
-  mesh.position.set(x, y, 0);
-  scene.add( mesh );
-  // bonds
-  createBonds([ false, true, false, false ], x, y, bondLength, bondInsideLength, atomRadius, materialGray);
-}
-
-// whichBonds is an array of booleans [ showTop, showRight, showBottom, showLeft ]
-// if it is null, all are shown
-function createBonds(whichBonds, x, y, bondLength, bondInsideLength, atomRadius, material) {
-  var bondBottomPosition = bondLength / 2 + atomRadius - bondInsideLength;
-  var mesh, geometry;
-
-  geometry = new THREE.CylinderGeometry(8, 8, bondLength, 8, 8, false);
-
-  if(!!!whichBonds || whichBonds[0] === true) {
-    mesh = new THREE.Mesh( geometry, material );
-    mesh.position.set(x, y+bondBottomPosition, 0);
-    scene.add(mesh);
-  }
-  if(!!!whichBonds || whichBonds[1] === true) {
-    mesh = new THREE.Mesh( geometry, material );
-    mesh.position.set(x+bondBottomPosition, y, 0);
-    mesh.rotation.z = Math.PI/2;
-    scene.add(mesh);
-  }
-  if(!!!whichBonds || whichBonds[2] === true) {
-    mesh = new THREE.Mesh( geometry, material );
-    mesh.position.set(x, y-bondBottomPosition, 0);
-    scene.add(mesh);
-  }
-
-  if(!!!whichBonds || whichBonds[3] === true) {
-    mesh = new THREE.Mesh( geometry, material );
-    mesh.position.set(x-bondBottomPosition, y, 0);
-    mesh.rotation.z = Math.PI/2;
-    scene.add(mesh);
-  }
 }
 
 function buildAxes(scene) {
