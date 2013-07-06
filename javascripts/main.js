@@ -7,15 +7,15 @@ $(function() {
 var camera, scene, renderer, controls;
 
 function init() {
-  var SCENE_WIDTH = 500, SCENE_HEIGHT = 500;
+  var SCENE_WIDTH = 300, SCENE_HEIGHT = 300;
 
   camera = new THREE.PerspectiveCamera( 75, SCENE_WIDTH / SCENE_HEIGHT, 1, 10000 );
-  camera.position.x = 0;
-  camera.position.y = 0;
-  camera.position.z = 500;
+  camera.position.x = 150;
+  camera.position.y = 200;
+  camera.position.z = 200;
 
   scene = new THREE.Scene();
-  buildAxes(scene);
+  //buildAxes(scene);
   buildMolecule1(scene);
 
   var keyLight =
@@ -88,8 +88,8 @@ function buildMolecule1(scene) {
   var vertexes = createTetrahedronCoords(200);
   var atomRadius = 30;
 
-  // C, Br, Cl, F, H
-  var atomColors = [ 0xBBBBBB, 0xFF0000, 0x00FF00, 0xFFFF00, 0xEFEFEF ];
+  // C, Cl, Br, F, H
+  var atomColors = [ 0xBBBBBB, 0x00FF00, 0xFF0000, 0xFFFF00, 0xEFEFEF ];
 
   vertexes.forEach(function(v, i) {
     var material = new THREE.MeshLambertMaterial( { color: atomColors[i] } );

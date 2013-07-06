@@ -430,4 +430,11 @@ Small Device Styles
   clear:both;
 }
 
+em {
+  font-size: smaller;
+}
 
+.drawing-annotation {
+  margin: 0;
+  text-align: center;
+}
